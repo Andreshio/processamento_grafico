@@ -13,10 +13,10 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Shaders">
+    <Filter Include="Header Files\Shaders">
       <UniqueIdentifier>{144377e4-e915-4645-a9cb-2170b78cf5ee}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\Core">
+    <Filter Include="Header Files\Shaders\Core">
       <UniqueIdentifier>{a385c29a-17a6-49db-8114-65941d6252aa}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -50,10 +50,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Core\core.frag">
-      <Filter>Shaders\Core</Filter>
+      <Filter>Header Files\Shaders\Core</Filter>
     </None>
     <None Include="Shaders\Core\core.vert">
-      <Filter>Shaders\Core</Filter>
+      <Filter>Header Files\Shaders\Core</Filter>
     </None>
   </ItemGroup>
 </Project>
