@@ -1,8 +1,10 @@
 ﻿#include "Includes.h"
-#include <SOIL.h>
+#define SPRITE
+#include "Sprite.cpp"
 
-#define STB_IMAGE_IMPLEMENTATION
-//#include "lib/stb_image.h"
+//#define STB_IMAGE_IMPLEMENTATION
+//#include "stb_image.h"
+
 
 //#define EXIT_FAILURE -1
 //#define EXIT_SUCCESS 0
@@ -20,10 +22,15 @@ float yCentro = 0.0f;
 unsigned int texture1;
 unsigned int texture2;
 
+vector<Sprite *> layers;
 
 glm::mat4 matrix_translaction = glm::mat4(1);
 glm::mat4 matrix_rotation = glm::mat4(1);
-glm::mat4 matrix = matrix_translaction * matrix_rotation;
+glm::mat4 matrix_scala = glm::mat4(1);
+glm::mat4 matrix = matrix_translaction * matrix_rotation * matrix_scala;
+
+float value_scala = 1.2f;
+float value_move = 3.0f;
 
 //Define escala dos objetos
 void window_content_scale_callback(GLFWwindow* window, float xscale, float yscale)
@@ -65,16 +72,17 @@ void window_size_callback(GLFWwindow* window, int width, int height)
 //Define acoes do teclado
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (key == GLFW_KEY_U && action == GLFW_PRESS) {
-		matrix_rotation = glm::rotate(matrix_rotation, glm::radians(-20.0f), glm::vec3(0, 0, 1));
-		matrix = matrix_translaction * matrix_rotation;
-	}
-	else if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-		matrix_rotation = glm::rotate(matrix_rotation, glm::radians(20.0f), glm::vec3(0, 0, 1));
-		matrix = matrix_translaction * matrix_rotation;
-	}
-	else if ((action == GLFW_REPEAT || action == GLFW_PRESS)) {
-		if (key == GLFW_KEY_C) {
+
+	if ((action == GLFW_REPEAT || action == GLFW_PRESS)) {
+		if (key == GLFW_KEY_U) {
+			matrix_rotation = glm::rotate(matrix_rotation, glm::radians(-20.0f), glm::vec3(0, 0, 1));
+			matrix = matrix_translaction * matrix_rotation * matrix_scala;
+		}
+		else if (key == GLFW_KEY_R) {
+			matrix_rotation = glm::rotate(matrix_rotation, glm::radians(20.0f), glm::vec3(0, 0, 1));
+			matrix = matrix_translaction * matrix_rotation * matrix_scala;
+		}
+		else if (key == GLFW_KEY_C) {
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, texture1);
 		}
@@ -84,34 +92,43 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		}
 		else if (key == GLFW_KEY_RIGHT) {
 			matrix_translaction = glm::translate(matrix_translaction,
-				glm::vec3(5.0f, 0.0f, 0.0f));
-			matrix = matrix_translaction * matrix_rotation;
-			xCentro = xCentro + 5.0f;
+				glm::vec3(value_move, 0.0f, 0.0f));
+			matrix = matrix_translaction * matrix_rotation * matrix_scala;
+			xCentro = xCentro + value_move;
 		}
 		else if (key == GLFW_KEY_LEFT) {
 			matrix_translaction = glm::translate(matrix_translaction,
-				glm::vec3(-5.0f, 0.0f, 0.0f));
-			matrix = matrix_translaction * matrix_rotation;
-			xCentro = xCentro - 5.0f;
+				glm::vec3(-value_move, 0.0f, 0.0f));
+			matrix = matrix_translaction * matrix_rotation * matrix_scala;
+			xCentro = xCentro - value_move;
 		}
 		else if (key == GLFW_KEY_DOWN) {
 			matrix_translaction = glm::translate(matrix_translaction,
-				glm::vec3(0.0f, 5.0f, 0.0f));
-			matrix = matrix_translaction * matrix_rotation;
-			yCentro = yCentro + 5.0f;
+				glm::vec3(0.0f, value_move, 0.0f));
+			matrix = matrix_translaction * matrix_rotation * matrix_scala;
+			yCentro = yCentro + value_move;
 		}
 		else if (key == GLFW_KEY_UP) {
 			matrix_translaction = glm::translate(matrix_translaction,
-				glm::vec3(0.0f, -5.0f, 0.0f));
-			matrix = matrix_translaction * matrix_rotation;
-			yCentro = yCentro - 5.0f;
+				glm::vec3(0.0f, -value_move, 0.0f));
+			matrix = matrix_translaction * matrix_rotation * matrix_scala;
+			yCentro = yCentro - value_move;
 		}
 		else if (key == GLFW_KEY_ESCAPE) {
 			glfwSetWindowShouldClose(window, true);
 		}
+		else if (key == GLFW_KEY_KP_ADD)
+		{
+			matrix_scala = glm::scale(matrix_scala, glm::vec3(value_scala, value_scala, value_scala));
+			matrix = matrix_translaction * matrix_rotation * matrix_scala;
+		}
+		else if (key == GLFW_KEY_KP_SUBTRACT)
+		{
+			matrix_scala = glm::scale(matrix_scala, glm::vec3(1.0f / value_scala, 1.0f / value_scala, 1.0f / value_scala));
+			matrix = matrix_translaction * matrix_rotation * matrix_scala;
+		}
 	}
 }
-
 
 unsigned int create_textures(const char* filename) {
 	unsigned int texture;
@@ -120,35 +137,25 @@ unsigned int create_textures(const char* filename) {
 
 	// set the texture wrapping/filtering options (on the currently bound texture object)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);//ou GL_REPEAT
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//ou GL_LINEAR
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);//ou GL_REPEAT
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//ou GL_LINEAR
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	// load and generate the texture
-	int tex_width, tex_height, nrChannels;
-	//unsigned char *data = stbi_load(filename, &tex_width, &tex_height, &nrChannels, 0);
+	int tex_width, tex_height, nrChanel;
 	unsigned char *data = SOIL_load_image(filename, &tex_width, &tex_height, 0, SOIL_LOAD_RGBA);
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_width, tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-		//        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-		//                     data->getWidth(), data->getHeight(), 0,
-		//                     GL_BGRA_EXT, GL_UNSIGNED_BYTES,
-		//                     data->getPixels());
-
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else
 	{
-		printf("%s", "Failed to load texture");
+		printf("%s %s", "Failed to load texture", filename);
 	}
 	SOIL_free_image_data(data);
-	//stbi_image_free(data);
 	return texture;
 }
-
 
 GLuint create_shader(GLenum shaderType, const char* shaderSource) {
 	GLuint shader = glCreateShader(shaderType);
@@ -203,12 +210,12 @@ int main() {
 
 	float vertices[] = {
 		// positions                // colors                // texture coords
-		-100.0f, -100.0f, 0.0f,     1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top left
-		-100.0f, 100.0f, 0.0f,      0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom left
-		100.0f, 100.0f, 0.0f,       0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom right
-		100.0f, 100.0f, 0.0f,       0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom right
-		100.0f, -100.0f, 0.0f,      1.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top right
-		-100.0f, -100.0f, 0.0f,     1.0f, 0.0f, 1.0f,   1.0f, 1.0f, // top left
+		-400.0f, -300.0f, 0.0f,     1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top left
+		-400.0f, 300.0f, 0.0f,      0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom left
+		400.0f, 300.0f, 0.0f,       0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom right
+		400.0f, 300.0f, 0.0f,       0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom right
+		400.0f, -300.0f, 0.0f,      1.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top right
+		-400.0f, -300.0f, 0.0f,     1.0f, 0.0f, 1.0f,   1.0f, 1.0f, // top left
 	};
 
 	unsigned int indices[] = {
@@ -229,17 +236,16 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	glBindVertexArray(VAO);
+	//glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
+	/*
 	const char* vertexShaderSource =
 		"#version 330 core\n"
 		"layout (location = 0) in vec3 aPos;"
 		"layout (location = 1) in vec3 aColor;"
 		"layout (location = 2) in vec2 aTexCoord;"
-		"layout (location = 3) in vec2 bTexCoord;"
 		"out vec3 outColor;"
 		"out vec2 TexCoord;"
 		"uniform mat4 matrix;"
@@ -249,17 +255,6 @@ int main() {
 		"   outColor = aColor;"
 		"   TexCoord = aTexCoord;"
 		"}";
-
-	/*const char* vertexShaderSource =
-	"#version 330 core\n"
-	"layout (location = 0) in vec3 aPos;"
-	"layout (location = 1) in vec3 aColor;"
-	"out vec3 ourColor;"
-	"uniform mat4 proj;"
-	"void main() {"
-	"gl_Position = proj * vec4(aPos.x, aPos.y, aPos.z, 1.0);"
-	"ourColor = aColor;"
-	"}";*/
 
 	const char* fragmentShaderSource =
 		"#version 330 core\n"
@@ -271,14 +266,35 @@ int main() {
 		"void main() {"
 		"   frag_color = texture(texture_a, TexCoord) * vec4(outColor, 1.0);"
 		"}";
+	*/
 
-	/*const char* fragmentShaderSource =
-	"#version 330 core\n"
-	"out vec4 frag_color;"
-	"in vec3 ourColor;"
-	"void main() {"
-	"frag_color = vec4(ourColor, 1.0);"
-	"}";*/
+	const char* vertexShaderSource =
+		"#version 410\n"
+		"layout (location = 0) in vec2 aPos;"
+		"layout (location = 2) in vec2 aTexCoord;"
+		"out vec2 TexCoord;"
+		"uniform mat4 matrix;"
+		"uniform mat4 proj;"
+		"uniform float layer_z;"
+		"void main() {"
+		"   gl_Position = proj * matrix * vec4(aPos,layer_z,1.0);"  //projeção * matrix de movientos * pontos iniciais
+		"   TexCoord = aTexCoord;"
+		"}";
+
+
+	const char* fragmentShaderSource =
+		"#version 410\n"
+		"out vec4 frag_color;"
+		"in vec2 TexCoord;"
+
+		"uniform sampler2D sprite;"
+		"uniform float offsetX;"
+		"uniform float offsetY;"
+
+		"void main() {"
+		"	vec4 texel = texture(sprite,vec2(TexCoord.x + offsetX, TexCoord.y + offsetY));"
+		"	frag_color = texel;"
+		"}";
 
 	unsigned int vertexShader = create_shader(GL_VERTEX_SHADER, vertexShaderSource);
 	GLuint fragmentShader = create_shader(GL_FRAGMENT_SHADER, fragmentShaderSource);
@@ -303,14 +319,20 @@ int main() {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
-	texture1 = create_textures("resource/batman.png");
-	glUniform1i(glGetUniformLocation(shaderProgram, "texture_a"), 0);
+	//texture1 = create_textures("batman.png");
+	//glUniform1i(glGetUniformLocation(shaderProgram, "texture_a"), 0);
 
-	texture2 = create_textures("resource/container.jpg");
-	glUniform1i(glGetUniformLocation(shaderProgram, "texture_b"), 1);
+	//texture2 = create_textures("container.jpg");
+	//glUniform1i(glGetUniformLocation(shaderProgram, "texture_b"), 1);
 
-	GLint location = glGetUniformLocation(shaderProgram, "inColor");
-	glUniform4f(location, 0.0f, 0.0f, 1.0f, 1.0f);
+	Sprite *t0 = new Sprite("resource/container.jpg", 0.0f, 0.0f, -0.6f);
+	Sprite *t1 = new Sprite("resource/batman1.png", 0.0f, 0.0f, -0.4f);
+	
+	layers.push_back(t1);
+	layers.push_back(t0);
+
+	//GLint location = glGetUniformLocation(shaderProgram, "inColor");
+	//glUniform4f(location, 0.0f, 0.0f, 1.0f, 1.0f);
 
 
 
@@ -320,22 +342,27 @@ int main() {
 	colocarObjetoEmPosicaoAdequadaNoEspaco();
 
 
+	//--------------------------------------------------------------------------//
+	//-------------------		CALLBACKS		--------------------------------//
 
-	//os callback
 	// esta para quando clicar com o mouse
-	glfwSetMouseButtonCallback(window, mouse_button_callback);
+	//glfwSetMouseButtonCallback(window, mouse_button_callback);
+	
 	// esta para quando clicar uma tecla
-	glfwSetKeyCallback(window, key_callback);
+	//glfwSetKeyCallback(window, key_callback);
 	// esta para quando redimensionar a tela
-	glfwSetWindowSizeCallback(window, window_size_callback);
+	//glfwSetWindowSizeCallback(window, window_size_callback);
 	// esta para escalar os objetos
-//    glfwSetWindowContentScaleCallback(window, window_content_scale_callback);
+	//glfwSetWindowContentScaleCallback(window, window_content_scale_callback);
 
 
 
 	//Starta texture
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture1);
+	// glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, texture1);
+
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_DEPTH_TEST);
 
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -355,19 +382,37 @@ int main() {
 			glGetUniformLocation(shaderProgram, "matrix"), 1,
 			GL_FALSE, glm::value_ptr(matrix));
 
-		//        glActiveTexture(GL_TEXTURE0);
-		//        glBindTexture(GL_TEXTURE_2D, texture1);
-
-				// Define vao como verte array atual
+		// Define vao como verte array atual
 		glBindVertexArray(VAO);
+		
+		for (int i = 0; i < 2; i++) {
+			glUniform1f(
+				glGetUniformLocation(shaderProgram, "offsetX"), layers[i]->offsetX);
+			glUniform1f(
+				glGetUniformLocation(shaderProgram, "offsetY"), layers[i]->offsetY);
+			glUniform1f(
+				glGetUniformLocation(shaderProgram, "layer_z"), layers[i]->z);
+			// bind Texture
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, layers[i]->textureId);
+			glUniform1i(glGetUniformLocation(shaderProgram, "sprite"), 0);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			
+
+		}
+		
+
 		// desenha pontos a partir do p0 e 6 no total do VAO atual com o shader
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		glfwWaitEvents();
 		glfwPollEvents();
 		glfwSwapBuffers(window);
+
 	}
 
+	delete t0;
+	delete t1;
 
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
