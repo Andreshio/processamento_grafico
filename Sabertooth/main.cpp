@@ -2,6 +2,8 @@
 #define SPRITE
 #include "Sprite.cpp"
 
+//#include "<Windows.h>"
+
 //#define STB_IMAGE_IMPLEMENTATION
 //#include "stb_image.h"
 
@@ -269,7 +271,7 @@ int main() {
 	*/
 
 	const char* vertexShaderSource =
-		"#version 410\n"
+		"#version 430\n"
 		"layout (location = 0) in vec2 aPos;"
 		"layout (location = 2) in vec2 aTexCoord;"
 		"out vec2 TexCoord;"
@@ -325,11 +327,16 @@ int main() {
 	//texture2 = create_textures("container.jpg");
 	//glUniform1i(glGetUniformLocation(shaderProgram, "texture_b"), 1);
 
-	Sprite *t0 = new Sprite("resource/container.jpg", 0.0f, 0.0f, -0.6f);
-	Sprite *t1 = new Sprite("resource/batman1.png", 0.0f, 0.0f, -0.4f);
-	
+
+	// X e Y são entre -1 E 1
+	glEnable(GL_DEPTH_TEST);
+
+	Sprite *t1 = new Sprite("resource/backblue.png", 0.4f, 0.0f, -0.4f);
+	Sprite *t0 = new Sprite("resource/batman2.png", 0.5f, 0.0f, -0.6f);
+
 	layers.push_back(t1);
 	layers.push_back(t0);
+	
 
 	//GLint location = glGetUniformLocation(shaderProgram, "inColor");
 	//glUniform4f(location, 0.0f, 0.0f, 1.0f, 1.0f);
@@ -354,15 +361,14 @@ int main() {
 	//glfwSetWindowSizeCallback(window, window_size_callback);
 	// esta para escalar os objetos
 	//glfwSetWindowContentScaleCallback(window, window_content_scale_callback);
+	glm::mat4 projection =
+		glm::ortho(0.0f, (float)WIDTH, (float)HEIGHT, 0.0f, -1.0f, 1.0f);
 
-
+	
 
 	//Starta texture
 	// glActiveTexture(GL_TEXTURE0);
 	//glBindTexture(GL_TEXTURE_2D, texture1);
-
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_DEPTH_TEST);
 
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -371,12 +377,10 @@ int main() {
 		glUseProgram(shaderProgram);
 
 		// glm projecao
-		glm::mat4 projection =
-			glm::ortho(0.0f, (float)WIDTH, (float)HEIGHT, 0.0f, -1.0f, 1.0f);
-
 		glUniformMatrix4fv(
 			glGetUniformLocation(shaderProgram, "proj"), 1,
 			GL_FALSE, glm::value_ptr(projection));
+
 
 		glUniformMatrix4fv(
 			glGetUniformLocation(shaderProgram, "matrix"), 1,
@@ -384,7 +388,6 @@ int main() {
 
 		// Define vao como verte array atual
 		glBindVertexArray(VAO);
-		
 		for (int i = 0; i < 2; i++) {
 			glUniform1f(
 				glGetUniformLocation(shaderProgram, "offsetX"), layers[i]->offsetX);
@@ -394,12 +397,16 @@ int main() {
 				glGetUniformLocation(shaderProgram, "layer_z"), layers[i]->z);
 			// bind Texture
 			glActiveTexture(GL_TEXTURE0);
+
+			//glEnable(GL_TEXTURE_2D);
+			glEnable(GL_DEPTH_TEST);
+
 			glBindTexture(GL_TEXTURE_2D, layers[i]->textureId);
 			glUniform1i(glGetUniformLocation(shaderProgram, "sprite"), 0);
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-			
 
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		}
+		
 		
 
 		// desenha pontos a partir do p0 e 6 no total do VAO atual com o shader

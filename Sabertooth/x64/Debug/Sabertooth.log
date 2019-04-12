@@ -1,5 +1,9 @@
 ﻿  main.cpp
-c:\users\andre\onedrive\documentos\estudo\faculdade\processamento gráfico\sabertooth-master\sabertooth\main.cpp(74): warning C4267: '=': conversão de 'size_t' para 'GLint', possível perda de dados
+c:\users\andre\onedrive\documentos\estudo\faculdade\processamento gráfico\sabertooth-master\sabertooth\main.cpp(57): warning C4244: '=': conversão de 'double' para 'float', possível perda de dados
+c:\users\andre\onedrive\documentos\estudo\faculdade\processamento gráfico\sabertooth-master\sabertooth\main.cpp(58): warning C4244: '=': conversão de 'double' para 'float', possível perda de dados
+c:\users\andre\onedrive\documentos\estudo\faculdade\processamento gráfico\sabertooth-master\sabertooth\main.cpp(147): warning C4101: 'nrChanel': variável local não referenciada
+c:\users\andre\onedrive\documentos\estudo\faculdade\processamento gráfico\sabertooth-master\sabertooth\main.cpp(186): warning C4244: '=': conversão de 'double' para 'float', possível perda de dados
+c:\users\andre\onedrive\documentos\estudo\faculdade\processamento gráfico\sabertooth-master\sabertooth\main.cpp(187): warning C4244: '=': conversão de 'double' para 'float', possível perda de dados
   SOIL.lib(SOIL.obj) : MSIL .netmodule ou módulo compilado com /GL encontrado; reiniciando link com /LTCG; adicione /LTCG ao link da linha de comando para melhorar performance do vinculador
 LINK : warning LNK4075: ignorando '/INCREMENTAL' devido a especificaþÒo '/LTCG'
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflita com uso de outras bibliotecas; use /NODEFAULTLIB:library
