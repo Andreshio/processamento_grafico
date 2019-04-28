@@ -294,6 +294,9 @@ int main() {
 
 		"void main() {"
 		"	vec4 texel = texture(sprite,vec2(TexCoord.x + offsetX, TexCoord.y + offsetY));"
+		"	if (texel.a < 0.5) {"
+		"		discard;"
+		"	}"
 		"	frag_color = texel;"
 		"}";
 
@@ -330,17 +333,13 @@ int main() {
 	// X e Y são entre -1 E 1
 	glEnable(GL_DEPTH_TEST);
 
-	Sprite *t1 = new Sprite("resource/backblue.png", 0.4f, 0.0f, -0.4f);
-	Sprite *t0 = new Sprite("resource/batman2.png", 0.5f, 0.0f, -0.6f);
+	Sprite *t0 = new Sprite("resource/backblue.png", 0.5f, 0.0f, -0.6f);
+	Sprite *t1 = new Sprite("resource/batman1.png", 0.4f, 0.0f, -0.4f);
+	
 
 	layers.push_back(t1);
 	layers.push_back(t0);
 	
-
-	//GLint location = glGetUniformLocation(shaderProgram, "inColor");
-	//glUniform4f(location, 0.0f, 0.0f, 1.0f, 1.0f);
-
-
 
 	//AO INCIAR A MASCARA ESTA EM POSICAO 0,0 SEU CENTRO
 	//A TEXTURA PODE ESTAR VIRARA
@@ -385,8 +384,13 @@ int main() {
 			glGetUniformLocation(shaderProgram, "matrix"), 1,
 			GL_FALSE, glm::value_ptr(matrix));
 
-		// Define vao como verte array atual
+		// Define quais vertices serão desenhados atual
 		glBindVertexArray(VAO);
+
+
+		/*
+			Desenha os layers
+		*/
 		for (int i = 0; i < 2; i++) {
 			glUniform1f(
 				glGetUniformLocation(shaderProgram, "offsetX"), layers[i]->offsetX);
@@ -405,7 +409,6 @@ int main() {
 
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		}
-		
 		
 
 		// desenha pontos a partir do p0 e 6 no total do VAO atual com o shader
